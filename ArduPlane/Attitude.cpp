@@ -82,8 +82,8 @@ void Plane::stabilize_roll(float speed_scaler)
     if (control_mode == STABILIZE && channel_roll->control_in != 0) {
         disable_integrator = true;
     }
-    channel_roll->servo_out = rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor, 
-                                                           speed_scaler, 
+    channel_roll->servo_out = rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor,
+                                                           speed_scaler,
                                                            disable_integrator);
 }
 
@@ -106,8 +106,8 @@ void Plane::stabilize_pitch(float speed_scaler)
     if (control_mode == STABILIZE && channel_pitch->control_in != 0) {
         disable_integrator = true;
     }
-    channel_pitch->servo_out = pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor, 
-                                                             speed_scaler, 
+    channel_pitch->servo_out = pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor,
+                                                             speed_scaler,
                                                              disable_integrator);
 }
 
@@ -120,7 +120,7 @@ void Plane::stabilize_pitch(float speed_scaler)
 void Plane::stick_mix_channel(RC_Channel *channel, int16_t &servo_out)
 {
     float ch_inf;
-        
+
     ch_inf = (float)channel->radio_in - (float)channel->radio_trim;
     ch_inf = fabsf(ch_inf);
     ch_inf = min(ch_inf, 400.0f);
@@ -177,7 +177,7 @@ void Plane::stabilize_stick_mixing_fbw()
     }
     nav_roll_cd += roll_input * roll_limit_cd;
     nav_roll_cd = constrain_int32(nav_roll_cd, -roll_limit_cd, roll_limit_cd);
-    
+
     float pitch_input = channel_pitch->norm_input();
     if (fabsf(pitch_input) > 0.5f) {
         pitch_input = (3*pitch_input - 1);
@@ -199,7 +199,7 @@ void Plane::stabilize_stick_mixing_fbw()
 
     - hold a specific heading with ground steering
     - rate controlled with ground steering
-    - yaw control for coordinated flight    
+    - yaw control for coordinated flight
  */
 void Plane::stabilize_yaw(float speed_scaler)
 {
@@ -209,7 +209,7 @@ void Plane::stabilize_yaw(float speed_scaler)
     } else {
         // otherwise use ground steering when no input control and we
         // are below the GROUND_STEER_ALT
-        steering_control.ground_steering = (channel_roll->control_in == 0 && 
+        steering_control.ground_steering = (channel_roll->control_in == 0 &&
                                             fabsf(relative_altitude()) < g.ground_steer_alt);
         if (control_mode == AUTO && flight_stage == AP_SpdHgtControl::FLIGHT_LAND_APPROACH) {
             // don't use ground steering on landing approach
@@ -252,7 +252,7 @@ void Plane::stabilize_training(float speed_scaler)
         if ((nav_roll_cd > 0 && channel_roll->control_in < channel_roll->servo_out) ||
             (nav_roll_cd < 0 && channel_roll->control_in > channel_roll->servo_out)) {
             // allow user to get out of the roll
-            channel_roll->servo_out = channel_roll->control_in;            
+            channel_roll->servo_out = channel_roll->control_in;
         }
     }
 
@@ -263,7 +263,7 @@ void Plane::stabilize_training(float speed_scaler)
         if ((nav_pitch_cd > 0 && channel_pitch->control_in < channel_pitch->servo_out) ||
             (nav_pitch_cd < 0 && channel_pitch->control_in > channel_pitch->servo_out)) {
             // allow user to get back to level
-            channel_pitch->servo_out = channel_pitch->control_in;            
+            channel_pitch->servo_out = channel_pitch->control_in;
         }
     }
 
@@ -367,10 +367,10 @@ void Plane::stabilize()
     }
 
     /*
-      see if we should zero the attitude controller integrators. 
+      see if we should zero the attitude controller integrators.
      */
     if (channel_throttle->control_in == 0 &&
-        relative_altitude_abs_cm() < 500 && 
+        relative_altitude_abs_cm() < 500 &&
         fabsf(barometer.get_climb_rate()) < 0.5f &&
         gps.ground_speed() < 3) {
         // we are low, with no climb rate, and zero throttle, and very
@@ -382,7 +382,7 @@ void Plane::stabilize()
 
         // if moving very slowly also zero the steering integrator
         if (gps.ground_speed() < 1) {
-            steerController.reset_I();            
+            steerController.reset_I();
         }
     }
 }
@@ -442,7 +442,7 @@ void Plane::calc_nav_yaw_course(void)
  */
 void Plane::calc_nav_yaw_ground(void)
 {
-    if (gps.ground_speed() < 1 && 
+    if (gps.ground_speed() < 1 &&
         channel_throttle->control_in == 0 &&
         flight_stage != AP_SpdHgtControl::FLIGHT_TAKEOFF) {
         // manual rudder control while still
@@ -458,7 +458,7 @@ void Plane::calc_nav_yaw_ground(void)
     }
     if (!is_zero(steer_rate)) {
         // pilot is giving rudder input
-        steer_state.locked_course = false;        
+        steer_state.locked_course = false;
     } else if (!steer_state.locked_course) {
         // pilot has released the rudder stick or we are still - lock the course
         steer_state.locked_course = true;
@@ -511,7 +511,7 @@ void Plane::throttle_slew_limit(int16_t last_throttle)
         slewrate = g.takeoff_throttle_slewrate;
     }
     // if slew limit rate is set to zero then do not slew limit
-    if (slewrate) {                   
+    if (slewrate) {
         // limit throttle change by the given percentage per second
         float temp = slewrate * G_Dt * 0.01f * fabsf(channel_throttle->radio_max - channel_throttle->radio_min);
         // allow a minimum change of 1 PWM per cycle
@@ -529,7 +529,7 @@ void Plane::flap_slew_limit(int8_t &last_value, int8_t &new_value)
 {
     uint8_t slewrate = g.flap_slewrate;
     // if slew limit rate is set to zero then do not slew limit
-    if (slewrate) {                   
+    if (slewrate) {
         // limit flap change by the given percentage per second
         float temp = slewrate * G_Dt;
         // allow a minimum change of 1% per cycle. This means the
@@ -570,37 +570,37 @@ bool Plane::suppress_throttle(void)
         return false;
     }
 
-    if (control_mode==AUTO && 
+    if (control_mode==AUTO &&
         auto_state.takeoff_complete == false) {
         if (auto_takeoff_check()) {
-            // we're in auto takeoff 
+            // we're in auto takeoff
             throttle_suppressed = false;
             return false;
         }
         // keep throttle suppressed
         return true;
     }
-    
+
     if (relative_altitude_abs_cm() >= 1000) {
         // we're more than 10m from the home altitude
         throttle_suppressed = false;
-        gcs_send_text_fmt(PSTR("Throttle unsuppressed - altitude %.2f"), 
+        gcs_send_text_fmt(PSTR("Throttle unsuppressed - altitude %.2f"),
                           (double)(relative_altitude_abs_cm()*0.01f));
         return false;
     }
 
-    if (gps.status() >= AP_GPS::GPS_OK_FIX_2D && 
+    if (gps.status() >= AP_GPS::GPS_OK_FIX_2D &&
         gps.ground_speed() >= 5) {
         // if we have an airspeed sensor, then check it too, and
         // require 5m/s. This prevents throttle up due to spiky GPS
         // groundspeed with bad GPS reception
         if ((!ahrs.airspeed_sensor_enabled()) || airspeed.get_airspeed() >= 5) {
             // we're moving at more than 5 m/s
-            gcs_send_text_fmt(PSTR("Throttle unsuppressed - speed %.2f airspeed %.2f"), 
+            gcs_send_text_fmt(PSTR("Throttle unsuppressed - speed %.2f airspeed %.2f"),
                               (double)gps.ground_speed(),
                               (double)airspeed.get_airspeed());
             throttle_suppressed = false;
-            return false;        
+            return false;
         }
     }
 
@@ -613,23 +613,47 @@ bool Plane::suppress_throttle(void)
  */
 void Plane::channel_output_mixer(uint8_t mixing_type, int16_t &chan1_out, int16_t &chan2_out)
 {
-    int16_t c1, c2;
-    int16_t v1, v2;
+    //-------------------------------------------------------------------
+        int16_t c1, c2;
+        int16_t v1, v2;
+        int16_t ail1,ail2;
 
-    // first get desired elevator and rudder as -500..500 values
-    c1 = chan1_out - 1500;
-    c2 = chan2_out - 1500;
+        //modified for aileron diffential
+        //int16_t diff_mix=0.8;
+        // first get desired channel as -500..500 values
 
-    v1 = (c1 - c2) * g.mixing_gain;
-    v2 = (c1 + c2) * g.mixing_gain;
+        c1 = chan1_out - 1500;
+        c2 = chan2_out - 1500;
+        //copy channels to temp aileron
+        ail1 = chan1_out - 1500;
+        ail2 = chan1_out - 1500;
+        ail1 = -ail1;
+        //deactiveted output mixer for aileron diff
+        //v1 = (c1 - c2) * g.mixing_gain;
+        //v2 = (c1 + c2) * g.mixing_gain;
 
-    // now map to mixed output
-    switch (mixing_type) {
-    case MIXING_DISABLED:
-        return;
+        // now map to mixed output
+        switch (mixing_type) {
+        case MIXING_DISABLED:
 
-    case MIXING_UPUP:
-        break;
+            return;
+
+        case MIXING_UPUP:
+            //modified for flapperon aileron diffential for soaring planes
+            //flapperon is DISABLED at this release
+            //change the "greater than" sign if diff is swaped
+            if (ail1 > 0) {
+    	         ail1 = ail1 - (ail1 * 0.7f);
+            }
+
+            v1=ail1;
+
+            if (ail2 > 0) {
+               ail2 = ail2 - (ail2 * 0.7f);
+            }
+            v2=ail2;
+
+            break;
 
     case MIXING_UPDN:
         v2 = -v2;
@@ -672,7 +696,7 @@ void Plane::flaperon_update(int8_t flap_percent)
       Then adjust aileron trim for level flight (note that aileron trim is affected
       by mixing gain). flapin_channel's trim is not used.
      */
-     
+
     ch1 = channel_roll->radio_out;
     // The *5 is to take a percentage to a value from -500 to 500 for the mixer
     ch2 = 1500 - flap_percent * 5;
@@ -699,11 +723,11 @@ void Plane::set_servos_idle(void)
     if (auto_state.idle_wiggle_stage < 50) {
         servo_value = auto_state.idle_wiggle_stage * (4500 / 50);
     } else if (auto_state.idle_wiggle_stage < 100) {
-        servo_value = (100 - auto_state.idle_wiggle_stage) * (4500 / 50);        
+        servo_value = (100 - auto_state.idle_wiggle_stage) * (4500 / 50);
     } else if (auto_state.idle_wiggle_stage < 150) {
-        servo_value = (100 - auto_state.idle_wiggle_stage) * (4500 / 50);        
+        servo_value = (100 - auto_state.idle_wiggle_stage) * (4500 / 50);
     } else if (auto_state.idle_wiggle_stage < 200) {
-        servo_value = (auto_state.idle_wiggle_stage-200) * (4500 / 50);        
+        servo_value = (auto_state.idle_wiggle_stage-200) * (4500 / 50);
     } else {
         auto_state.idle_wiggle_stage = 0;
     }
@@ -785,7 +809,7 @@ void Plane::set_servos(void)
 
         if (g.mix_mode == 0 && g.elevon_output == MIXING_DISABLED) {
             // set any differential spoilers to follow the elevons in
-            // manual mode. 
+            // manual mode.
             RC_Channel_aux::set_radio(RC_Channel_aux::k_dspoiler1, channel_roll->radio_out);
             RC_Channel_aux::set_radio(RC_Channel_aux::k_dspoiler2, channel_pitch->radio_out);
         }
@@ -853,13 +877,13 @@ void Plane::set_servos(void)
                 max_throttle = aparm.throttle_max;
             }
         }
-        channel_throttle->servo_out = constrain_int16(channel_throttle->servo_out, 
+        channel_throttle->servo_out = constrain_int16(channel_throttle->servo_out,
                                                       min_throttle,
                                                       max_throttle);
 
         if (!hal.util->get_soft_armed()) {
             channel_throttle->servo_out = 0;
-            channel_throttle->calc_pwm();                
+            channel_throttle->calc_pwm();
         } else if (suppress_throttle()) {
             // throttle is suppressed in auto mode
             channel_throttle->servo_out = 0;
@@ -867,10 +891,10 @@ void Plane::set_servos(void)
                 // manual pass through of throttle while throttle is suppressed
                 channel_throttle->radio_out = channel_throttle->radio_in;
             } else {
-                channel_throttle->calc_pwm();                
+                channel_throttle->calc_pwm();
             }
-        } else if (g.throttle_passthru_stabilize && 
-                   (control_mode == STABILIZE || 
+        } else if (g.throttle_passthru_stabilize &&
+                   (control_mode == STABILIZE ||
                     control_mode == TRAINING ||
                     control_mode == ACRO ||
                     control_mode == FLY_BY_WIRE_A ||
@@ -878,7 +902,7 @@ void Plane::set_servos(void)
             // manual pass through of throttle while in FBWA or
             // STABILIZE mode with THR_PASS_STAB set
             channel_throttle->radio_out = channel_throttle->radio_in;
-        } else if (control_mode == GUIDED && 
+        } else if (control_mode == GUIDED &&
                    guided_throttle_passthru) {
             // manual pass through of throttle while in GUIDED
             channel_throttle->radio_out = channel_throttle->radio_in;
@@ -974,7 +998,7 @@ void Plane::set_servos(void)
     if (!arming.is_armed()) {
         //Some ESCs get noisy (beep error msgs) if PWM == 0.
         //This little segment aims to avoid this.
-        switch (arming.arming_required()) { 
+        switch (arming.arming_required()) {
             case AP_Arming::YES_MIN_PWM:
                 channel_throttle->radio_out = channel_throttle->radio_min;
             break;
@@ -989,7 +1013,7 @@ void Plane::set_servos(void)
     }
 
 #if OBC_FAILSAFE == ENABLED
-    // this is to allow the failsafe module to deliberately crash 
+    // this is to allow the failsafe module to deliberately crash
     // the plane. Only used in extreme circumstances to meet the
     // OBC rules
     obc.check_crash_plane();
@@ -998,7 +1022,7 @@ void Plane::set_servos(void)
 #if HIL_SUPPORT
     if (g.hil_mode == 1) {
         // get the servos to the GCS immediately for HIL
-        if (comm_get_txspace(MAVLINK_COMM_0) >= 
+        if (comm_get_txspace(MAVLINK_COMM_0) >=
             MAVLINK_MSG_ID_RC_CHANNELS_SCALED_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES) {
             send_servo_out(MAVLINK_COMM_0);
         }
@@ -1022,7 +1046,7 @@ void Plane::set_servos(void)
     RC_Channel_aux::output_ch_all();
 }
 
-void Plane::demo_servos(uint8_t i) 
+void Plane::demo_servos(uint8_t i)
 {
     while(i > 0) {
         gcs_send_text_P(SEVERITY_LOW,PSTR("Demo Servos!"));
@@ -1096,5 +1120,5 @@ void Plane::update_load_factor(void)
         }
         nav_roll_cd = constrain_int32(nav_roll_cd, -roll_limit, roll_limit);
         roll_limit_cd = constrain_int32(roll_limit_cd, -roll_limit, roll_limit);
-    }    
+    }
 }
